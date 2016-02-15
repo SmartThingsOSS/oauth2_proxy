@@ -331,9 +331,13 @@ func (p *OAuthProxy) SignInPage(rw http.ResponseWriter, req *http.Request, code 
 	p.ClearCookie(rw, req)
 	rw.WriteHeader(code)
 
-	redirect_url := req.URL.RequestURI()
-	if redirect_url == p.SignInPath {
-		redirect_url = "/"
+	var redirect_url string
+	if p, ok := req.Header["X-Forwarded-Proto"]; req.Host != "" && ok {
+		req.URL.Host = req.Host
+		req.URL.Scheme = p[0]
+		redirect_url = req.URL.String()
+	} else {
+		redirect_url = req.URL.RequestURI()
 	}
 
 	t := struct {
@@ -476,9 +480,6 @@ func (p *OAuthProxy) OAuthCallback(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	redirect := req.Form.Get("state")
-	if !strings.HasPrefix(redirect, "/") {
-		redirect = "/"
-	}
 
 	// set cookie, or deny
 	if p.Validator(session.Email) && p.provider.ValidateGroup(session.Email) {

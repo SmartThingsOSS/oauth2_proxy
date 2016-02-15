@@ -392,21 +392,6 @@ func TestSignInPageIncludesTargetRedirect(t *testing.T) {
 	}
 }
 
-func TestSignInPageDirectAccessRedirectsToRoot(t *testing.T) {
-	sip_test := NewSignInPageTest()
-	code, body := sip_test.GetEndpoint("/oauth2/sign_in")
-	assert.Equal(t, 200, code)
-
-	match := sip_test.sign_in_regexp.FindStringSubmatch(body)
-	if match == nil {
-		t.Fatal("Did not find pattern in body: " +
-			signInRedirectPattern + "\nBody:\n" + body)
-	}
-	if match[1] != "/" {
-		t.Fatal(`expected redirect to "/", but was "` + match[1] + `"`)
-	}
-}
-
 type ProcessCookieTest struct {
 	opts          *Options
 	proxy         *OAuthProxy
